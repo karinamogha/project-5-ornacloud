@@ -1,16 +1,17 @@
-import React, { useEffect } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useUser } from "./UserContext";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import "../index.css"; // Assuming your main CSS file
+import { useNavigate } from "react-router-dom";
+import '../index.css'; // Import global styles if needed
 
 function InvoicesPage() {
-  const { user, signedIn, setSignedIn } = useUser(); // User context for authentication
-  const { invoices, setInvoices } = useOutletContext(); // Shared state if needed
-  const navigate = useNavigate();
+  const { signedIn } = useUser();    // Check if user is signed in
+  const navigate = useNavigate();    // For navigation
 
-  const [filteredInvoices, setFilteredInvoices] = React.useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [company, setCompany] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Redirect to SignIn if not signed in
   useEffect(() => {
@@ -20,93 +21,59 @@ function InvoicesPage() {
   }, [signedIn, navigate]);
 
   // Fetch invoices from the backend
-  const fetchInvoices = async (company, setSubmitting, setErrors) => {
+  const fetchInvoices = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const response = await fetch(`http://localhost:5555/api/invoices/${company}`);
-      if (response.ok) {
-        const data = await response.json();
-        setFilteredInvoices(data);
-        setInvoices(data); // Optional: Update shared context state
-      } else {
-        setErrors({ company: "Failed to fetch invoices. Please try again." });
-      }
+      const response = await axios.get(`http://localhost:5555/api/invoices/${company}`);
+      setInvoices(response.data);
     } catch (err) {
-      console.error(err);
-      setErrors({ company: "An error occurred. Please try again." });
+      setError('Failed to fetch invoices. Please try again.');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  // Formik initial values and validation schema
-  const initialValues = { company: "" };
-  const validationSchema = Yup.object({
-    company: Yup.string().required("Please enter a company name to search."),
-  });
+  // Fetch whenever 'company' changes
+  useEffect(() => {
+    if (company) fetchInvoices();
+  }, [company]);
 
   return (
-    <div className="container">
-      {!signedIn ? (
-        <div>
-          <h2>Please sign in to view invoices</h2>
-          <button className="submit-button" onClick={() => navigate("/signin")}>
-            Sign In
-          </button>
-        </div>
-      ) : (
-        <>
-          <h1>Invoices</h1>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={(values, { setSubmitting, setErrors }) => {
-              fetchInvoices(values.company, setSubmitting, setErrors);
-            }}
-          >
-            {({ isSubmitting }) => (
-              <Form className="existing-search-form">
-                {/* Company Input */}
-                <Field
-                  name="company"
-                  type="text"
-                  placeholder="Search by Company"
-                  className="existing-search-input"
-                />
-                {/* Error Handling */}
-                <ErrorMessage name="company" component="div" className="form-error" />
-                
-                {/* Search Button */}
-                <button
-                  type="submit"
-                  className="existing-search-button"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Searching..." : "Search"}
-                </button>
-              </Form>
-            )}
-          </Formik>
-          
-          <ul className="list-container">
-            {filteredInvoices.length > 0 ? (
-              filteredInvoices.map((invoice) => (
-                <li key={invoice.invoice_number} className="list-item">
-                  <h3>{invoice.title}</h3>
-                  <p>Invoice Number: {invoice.invoice_number}</p>
-                  <p>Total Value: {invoice.total_value}</p>
-                  <p>Company: {invoice.company}</p>
-                </li>
-              ))
-            ) : (
-              <p>No invoices found.</p>
-            )}
-          </ul>
-        </>
-      )}
+    <div className="page-container">
+      <h1>Existing Invoices</h1>
+
+      <div className="existing-search-form">
+        <input
+          type="text"
+          placeholder="Search by Company"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          className="existing-search-input"
+        />
+        <button onClick={fetchInvoices} className="existing-search-button">
+          Search
+        </button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {error && <p className="form-error">{error}</p>}
+
+      <ul className="list-container">
+        {invoices.map((invoice) => (
+          <li key={invoice.invoice_number} className="list-item">
+            <h3>{invoice.title}</h3>
+            <p>Invoice Number: {invoice.invoice_number}</p>
+            <p>Total Value: {invoice.total_value}</p>
+            <p>Company: {invoice.company}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
 export default InvoicesPage;
+
 
 

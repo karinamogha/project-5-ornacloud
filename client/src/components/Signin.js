@@ -11,10 +11,11 @@ function Signin() {
     username: '',
     password: '',
     name: '',
-    lastname: '', // Added lastname field
+    lastname: '',
     age: '',
-    category: '',
+    category_id: '',  // <-- changed from 'category' to 'category_id'
   });
+
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [categories, setCategories] = useState([]);
@@ -25,11 +26,12 @@ function Signin() {
     fetch('/api/categories')
       .then((response) => response.json())
       .then((data) => {
-        setCategories(data);
+        setCategories(data); // e.g. [{ id:1, name:'Wholesale' }, { id:2, name:'Designer' }, ...]
         setLoadingCategories(false);
       })
       .catch((error) => {
         console.error('Error fetching categories:', error);
+        // Fallback if fetch fails:
         setCategories([
           { id: 1, name: 'Wholesale' },
           { id: 2, name: 'Designer' },
@@ -42,43 +44,45 @@ function Signin() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleBlur = (e) => {
     const { name } = e.target;
-    setTouched((prevTouched) => ({ ...prevTouched, [name]: true }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
     validateForm(name);
   };
 
-  const validateForm = (name) => {
+  const validateForm = (field) => {
     let error = "";
-    if (name === 'username' && !formValues.username) {
+    if (field === 'username' && !formValues.username) {
       error = "Username is required.";
-    } else if (name === 'password' && !formValues.password) {
+    } else if (field === 'password' && !formValues.password) {
       error = "Password is required.";
-    } else if (name === 'name' && isSignup && !formValues.name) {
+    } else if (field === 'name' && isSignup && !formValues.name) {
       error = "Name is required.";
-    } else if (name === 'lastname' && isSignup && !formValues.lastname) {
+    } else if (field === 'lastname' && isSignup && !formValues.lastname) {
       error = "Last name is required.";
-    } else if (name === 'age' && isSignup && !formValues.age) {
+    } else if (field === 'age' && isSignup && !formValues.age) {
       error = "Age is required.";
-    } else if (name === 'category' && isSignup && !formValues.category) {
+    } else if (field === 'category_id' && isSignup && !formValues.category_id) {
       error = "Category is required.";
     }
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate required fields
     const requiredFields = ['username', 'password'];
     if (isSignup) {
-      requiredFields.push('name', 'lastname', 'age', 'category');
+      requiredFields.push('name', 'lastname', 'age', 'category_id');
     }
     requiredFields.forEach(validateForm);
 
-    if (Object.values(errors).some((error) => error)) {
+    // If any errors are present, stop
+    if (Object.values(errors).some((err) => err)) {
       console.error("Form validation failed:", errors);
       return;
     }
@@ -124,7 +128,7 @@ function Signin() {
                 name: '',
                 lastname: '',
                 age: '',
-                category: '',
+                category_id: '',
               });
             }}
           >
@@ -144,7 +148,7 @@ function Signin() {
                 name: '',
                 lastname: '',
                 age: '',
-                category: '',
+                category_id: '',
               });
             }}
           >
@@ -155,6 +159,7 @@ function Signin() {
       )}
 
       <form className="signin" onSubmit={handleSubmit}>
+        {/* Username */}
         <div className="row">
           <label htmlFor="username">Username:</label>
           <input
@@ -168,6 +173,7 @@ function Signin() {
           {touched.username && errors.username && <div>{errors.username}</div>}
         </div>
 
+        {/* Password */}
         <div className="row">
           <label htmlFor="password">Password:</label>
           <input
@@ -183,6 +189,7 @@ function Signin() {
 
         {isSignup && (
           <>
+            {/* Name */}
             <div className="row">
               <label htmlFor="name">Name:</label>
               <input
@@ -196,6 +203,7 @@ function Signin() {
               {touched.name && errors.name && <div>{errors.name}</div>}
             </div>
 
+            {/* Last Name */}
             <div className="row">
               <label htmlFor="lastname">Last Name:</label>
               <input
@@ -209,6 +217,7 @@ function Signin() {
               {touched.lastname && errors.lastname && <div>{errors.lastname}</div>}
             </div>
 
+            {/* Age */}
             <div className="row">
               <label htmlFor="age">Age:</label>
               <input
@@ -222,15 +231,16 @@ function Signin() {
               {touched.age && errors.age && <div>{errors.age}</div>}
             </div>
 
+            {/* Category (actually category_id) */}
             <div className="row">
-              <label htmlFor="category">Category:</label>
+              <label htmlFor="category_id">Category:</label>
               {loadingCategories ? (
                 <p>Loading categories...</p>
               ) : (
                 <select
-                  id="category"
-                  name="category"
-                  value={formValues.category}
+                  id="category_id"
+                  name="category_id"
+                  value={formValues.category_id}
                   onChange={handleChange}
                   onBlur={handleBlur}
                 >
@@ -242,7 +252,7 @@ function Signin() {
                   ))}
                 </select>
               )}
-              {touched.category && errors.category && <div>{errors.category}</div>}
+              {touched.category_id && errors.category_id && <div>{errors.category_id}</div>}
             </div>
           </>
         )}
@@ -256,6 +266,7 @@ function Signin() {
 }
 
 export default Signin;
+
 
 
 

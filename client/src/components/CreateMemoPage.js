@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from "./UserContext";
 
 function CreateMemoPage() {
+  const { signedIn } = useUser();       // Check if the user is signed in
+  const navigate = useNavigate();
+
   const [formValues, setFormValues] = useState({
     title: '',
     memo_number: '',
@@ -15,7 +19,12 @@ function CreateMemoPage() {
     email: '',
   });
 
-  const navigate = useNavigate();
+  // If not signed in, redirect to "/signin"
+  useEffect(() => {
+    if (!signedIn) {
+      navigate("/signin");
+    }
+  }, [signedIn, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,7 +36,8 @@ function CreateMemoPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch('http://localhost:5555/api/memos', {
+
+    fetch('http://localhost:5555/memos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -191,6 +201,7 @@ function CreateMemoPage() {
 }
 
 export default CreateMemoPage;
+
 
 
 

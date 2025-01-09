@@ -3,20 +3,15 @@
 # Standard library imports
 import os
 from flask import request, jsonify, session, make_response
-from models import User, Memo, Invoice
-from config import app, api
+from models import User, Memo, Invoice, Category
+from config import app, api, logger, bcrypt, db, mail  # <-- Notice we also import 'mail'
 from flask_restful import Resource
-import logging  # Import logging library
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from flask_mail import Message  # <-- For sending emails
 
 # Routes and Views
 @app.route('/')
 def index():
     return '<h1>Project Server Running!</h1>'
-
 
 ### User Management Routes
 
@@ -28,9 +23,9 @@ class Signup(Resource):
             password = params.get('password')
             name = params.get('name')
             lastname = params.get('lastname')
-            category = params.get('category')
+            category_id = params.get('category_id')
 
-            if not all([username, password, name, lastname, category]):
+            if not all([username, password, name, lastname, category_id]):
                 logger.error("Missing required fields in signup request.")
                 return make_response({'error': 'Missing required fields'}, 400)
 
@@ -45,7 +40,7 @@ class Signup(Resource):
                 password=hashed_password,
                 name=name,
                 lastname=lastname,
-                category=category
+                category_id=category_id
             )
 
             db.session.add(user)
@@ -162,12 +157,35 @@ class Memos(Resource):
             db.session.add(new_memo)
             db.session.commit()
             logger.info(f"Memo '{new_memo.title}' created successfully.")
+
+            # OPTIONAL: Send Email to client if 'email' is included in data
+            client_email = data.get('email')
+            if client_email:
+                msg = Message(
+                    subject="Your Memo Has Been Created",
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[client_email]
+                )
+                msg.body = (
+                    f"Hello,\n\n"
+                    f"Your memo '{new_memo.title}' has been created.\n"
+                    f"Memo Number: {new_memo.memo_number}\n"
+                    f"Company: {new_memo.company}\n"
+                    f"Items: {new_memo.items}\n"
+                    "\nBest,\nOrnaCloud"
+                )
+                mail.send(msg)
+                logger.info(f"Email sent to {client_email} for memo '{new_memo.title}'.")
+
             return jsonify({"message": "Memo created successfully!"}), 201
         except Exception as e:
             logger.error(f"Error during memo creation: {e}")
             return make_response({'error': 'Failed to create memo'}, 400)
 
+# If your frontend calls "/memos", keep the next line as is:
 api.add_resource(Memos, '/memos')
+# If your frontend calls "/api/memos", rename it:
+# api.add_resource(Memos, '/api/memos')
 
 
 ### Invoice Management Routes
@@ -215,9 +233,76 @@ class Invoices(Resource):
 api.add_resource(Invoices, '/invoices')
 
 
+# -----------------------------------------------------------------------
+# NEW ROUTES MATCHING YOUR REACT FETCH CALLS
+# -----------------------------------------------------------------------
+
+class FutureMemos(Resource):
+    def get(self, user_id):
+        try:
+            memos = Memo.query.filter_by(user_id=user_id).all()
+            return jsonify([m.to_dict() for m in memos])
+        except Exception as e:
+            logger.error(f"Error retrieving future memos for user {user_id}: {e}")
+            return make_response({'error': 'Failed to retrieve future memos'}, 500)
+
+api.add_resource(FutureMemos, '/api/memos/<int:user_id>/future')
+
+
+class FutureInvoices(Resource):
+    def get(self, user_id):
+        try:
+            invoices = Invoice.query.filter_by(user_id=user_id).all()
+            return jsonify([inv.to_dict() for inv in invoices])
+        except Exception as e:
+            logger.error(f"Error retrieving future invoices for user {user_id}: {e}")
+            return make_response({'error': 'Failed to retrieve future invoices'}, 500)
+
+api.add_resource(FutureInvoices, '/api/invoices/<int:user_id>/future')
+
+
+class UserCompanies(Resource):
+    def get(self, user_id):
+        try:
+            memos_companies = db.session.query(Memo.company).filter_by(user_id=user_id).distinct()
+            invoices_companies = db.session.query(Invoice.company).filter_by(user_id=user_id).distinct()
+
+            companies = set()
+            for row in memos_companies:
+                companies.add(row.company)
+            for row in invoices_companies:
+                companies.add(row.company)
+
+            return jsonify(list(companies))
+        except Exception as e:
+            logger.error(f"Error retrieving companies for user {user_id}: {e}")
+            return make_response({'error': 'Failed to retrieve companies'}, 500)
+
+api.add_resource(UserCompanies, '/api/companies/<int:user_id>')
+
+
+# -----------------------------------------------------------------------
+# NEW ROUTE FOR CATEGORIES
+# -----------------------------------------------------------------------
+class Categories(Resource):
+    def get(self):
+        try:
+            from models import Category
+            categories = Category.query.all()
+            return [cat.to_dict() for cat in categories], 200
+        except Exception as e:
+            logger.error(f"Error retrieving categories: {e}")
+            return make_response({'error': 'Failed to retrieve categories'}, 500)
+
+api.add_resource(Categories, '/api/categories')
+
+
 ### Start the Flask App
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+
+
+
 
 
 

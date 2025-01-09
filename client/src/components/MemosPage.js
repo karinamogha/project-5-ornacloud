@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useUser } from "./UserContext";       // <-- Import your user context
+import { useNavigate } from "react-router-dom"; // <-- Import useNavigate
 import '../index.css'; // Import global styles if needed
 
 function MemosPage() {
+  const { signedIn } = useUser();          // <-- Grab signedIn from context
+  const navigate = useNavigate();          // <-- For navigation
+
   const [memos, setMemos] = useState([]);
   const [company, setCompany] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch Memos
+  // Redirect to SignIn if not signed in
+  useEffect(() => {
+    if (!signedIn) {
+      navigate("/signin");
+    }
+  }, [signedIn, navigate]);
+
+  // Fetch memos from the backend
   const fetchMemos = async () => {
     setLoading(true);
     setError('');
@@ -27,11 +39,13 @@ function MemosPage() {
     if (company) fetchMemos();
   }, [company]);
 
+  // If user is not signedIn, the `useEffect` above already redirects, 
+  // so the page won't render the below UI for unauthorized users.
+
   return (
     <div className="page-container">
       <h1>Existing Memos</h1>
 
-      {/* Centered single-line search bar */}
       <div className="existing-search-form">
         <input
           type="text"
@@ -63,4 +77,5 @@ function MemosPage() {
 }
 
 export default MemosPage;
+
 

@@ -1,4 +1,5 @@
 import os
+
 from sqlalchemy import MetaData
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -7,9 +8,11 @@ from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask import Flask
+import logging  # Import logging library
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 
 # Database configuration
@@ -18,6 +21,10 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Application secret key for session management
 SECRET_KEY = os.environ.get('SECRET_KEY', b'y$2\xa7l\x89\xb0\t\x87\xb5\x1abf\xff\xeb\xd5')  # Use environment variable or fallback
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Mail configuration
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')

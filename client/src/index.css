@@ -326,6 +326,15 @@ h1, h2, h3, h4, h5, h6 {
 /********************************************************************************
  * 11) Home Page & Sections
  ********************************************************************************/
+ /* HOME SECTION HOVER EFFECT */
+.home section {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home section:hover {
+  transform: scale(1.02);
+  box-shadow: 0 3px 8px var(--shadow-hover);
+}
 .home {
   /* Add a subtle gradient & shadow to differentiate the home page */
   padding: var(--spacing-md);
