@@ -9,8 +9,15 @@ from faker import Faker
 
 # Local imports
 from app import app
-from models import db, User, Memo, Invoice
-import random
+from models import db, User, Memo, Invoice, Category
+
+@app.before_first_request
+def seed_categories():
+    categories = ["Wholesale", "Designer", "Individual", "Other"]
+    for name in categories:
+        if not Category.query.filter_by(name=name).first():
+            db.session.add(Category(name=name))
+    db.session.commit()
 
 with app.app_context():
     # Create and initialize a fake generator
@@ -81,5 +88,6 @@ with app.app_context():
     db.session.commit()
 
     print("Seeding complete!")
+
 
 

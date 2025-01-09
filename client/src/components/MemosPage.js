@@ -8,6 +8,7 @@ function MemosPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch Memos
   const fetchMemos = async () => {
     setLoading(true);
     setError('');
@@ -21,6 +22,7 @@ function MemosPage() {
     }
   };
 
+  // Fetch whenever 'company' changes
   useEffect(() => {
     if (company) fetchMemos();
   }, [company]);
@@ -28,16 +30,24 @@ function MemosPage() {
   return (
     <div className="page-container">
       <h1>Existing Memos</h1>
-      <input
-        type="text"
-        placeholder="Search by Company"
-        value={company}
-        onChange={(e) => setCompany(e.target.value)}
-        className="form-input"
-      />
-      <button onClick={fetchMemos} className="form-button">Search</button>
+
+      {/* Centered single-line search bar */}
+      <div className="existing-search-form">
+        <input
+          type="text"
+          placeholder="Search by Company"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          className="existing-search-input"
+        />
+        <button onClick={fetchMemos} className="existing-search-button">
+          Search
+        </button>
+      </div>
+
       {loading && <p>Loading...</p>}
       {error && <p className="form-error">{error}</p>}
+
       <ul className="list-container">
         {memos.map((memo) => (
           <li key={memo.memo_number} className="list-item">
@@ -53,3 +63,4 @@ function MemosPage() {
 }
 
 export default MemosPage;
+

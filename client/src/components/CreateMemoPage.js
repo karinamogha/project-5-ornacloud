@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
 function CreateMemoPage() {
   const [formValues, setFormValues] = useState({
@@ -12,93 +12,185 @@ function CreateMemoPage() {
     total_value: '',
     remarks: '',
     company: '',
-    email: ''
+    email: '',
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues(prevValues => ({
+    setFormValues((prevValues) => ({
       ...prevValues,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await axios.post('http://localhost:5555/api/memos', formValues);
-      alert('Memo created and email sent!');
-    } catch (error) {
-      alert('Error creating memo');
-    }
+    fetch('http://localhost:5555/api/memos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formValues),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert('Memo created and email sent!');
+          navigate('/memos');
+        } else {
+          throw new Error('Error creating memo');
+        }
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="title"
-        placeholder="Title"
-        value={formValues.title}
-        onChange={handleChange}
-      />
-      <input
-        name="memo_number"
-        placeholder="Memo Number"
-        value={formValues.memo_number}
-        onChange={handleChange}
-      />
-      <input
-        name="expiry_date"
-        placeholder="Expiry Date"
-        value={formValues.expiry_date}
-        onChange={handleChange}
-      />
-      <textarea
-        name="wholesaler_details"
-        placeholder="Wholesaler Details"
-        value={formValues.wholesaler_details}
-        onChange={handleChange}
-      />
-      <textarea
-        name="buyer_details"
-        placeholder="Buyer Details"
-        value={formValues.buyer_details}
-        onChange={handleChange}
-      />
-      <textarea
-        name="items"
-        placeholder="Items"
-        value={formValues.items}
-        onChange={handleChange}
-      />
-      <input
-        name="total_value"
-        placeholder="Total Value"
-        value={formValues.total_value}
-        onChange={handleChange}
-      />
-      <textarea
-        name="remarks"
-        placeholder="Remarks"
-        value={formValues.remarks}
-        onChange={handleChange}
-      />
-      <input
-        name="company"
-        placeholder="Company"
-        value={formValues.company}
-        onChange={handleChange}
-      />
-      <input
-        name="email"
-        placeholder="Client Email"
-        value={formValues.email}
-        onChange={handleChange}
-      />
-      <button type="submit">Create Memo</button>
-    </form>
+    <div className="create-page">
+      <h2>Create a New Memo</h2>
+      <form onSubmit={handleSubmit}>
+        {/* Title */}
+        <div className="row">
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            name="title"
+            placeholder="Enter the title"
+            value={formValues.title}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Memo Number */}
+        <div className="row">
+          <label htmlFor="memo_number">Memo Number</label>
+          <input
+            type="text"
+            name="memo_number"
+            placeholder="Enter memo number"
+            value={formValues.memo_number}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Expiry Date */}
+        <div className="row">
+          <label htmlFor="expiry_date">Expiry Date</label>
+          <input
+            type="date"
+            name="expiry_date"
+            value={formValues.expiry_date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Wholesaler Details */}
+        <div className="row">
+          <label htmlFor="wholesaler_details">Wholesaler Details</label>
+          <textarea
+            name="wholesaler_details"
+            placeholder="Enter wholesaler details"
+            value={formValues.wholesaler_details}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Buyer Details */}
+        <div className="row">
+          <label htmlFor="buyer_details">Buyer Details</label>
+          <textarea
+            name="buyer_details"
+            placeholder="Enter buyer details"
+            value={formValues.buyer_details}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Items */}
+        <div className="row">
+          <label htmlFor="items">Items</label>
+          <textarea
+            name="items"
+            placeholder="Enter items"
+            value={formValues.items}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Total Value */}
+        <div className="row">
+          <label htmlFor="total_value">Total Value</label>
+          <input
+            type="number"
+            name="total_value"
+            placeholder="Enter total value"
+            value={formValues.total_value}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Remarks */}
+        <div className="row">
+          <label htmlFor="remarks">Remarks</label>
+          <textarea
+            name="remarks"
+            placeholder="Enter remarks"
+            value={formValues.remarks}
+            onChange={handleChange}
+          />
+        </div>
+
+        {/* Company */}
+        <div className="row">
+          <label htmlFor="company">Company</label>
+          <input
+            type="text"
+            name="company"
+            placeholder="Enter company name"
+            value={formValues.company}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Client Email */}
+        <div className="row">
+          <label htmlFor="email">Client Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter client email"
+            value={formValues.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-buttons">
+          <button type="submit" className="submit-button">
+            Create Memo
+          </button>
+          <Link to="/memos">
+            <button type="button" className="submit-button">
+              Back to Memos
+            </button>
+          </Link>
+        </div>
+      </form>
+    </div>
   );
 }
 
 export default CreateMemoPage;
+
+
 

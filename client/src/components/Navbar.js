@@ -34,7 +34,7 @@ function Navbar() {
 
   return (
     <header className="header">
-      <span className="title-nav">Renter</span>
+      <span className="title-nav">OrnaCloud</span>
       <span className="headerlinks">
         {/* Navigation links */}
         <NavLink className="headerlink" to='/'>Home</NavLink>

@@ -63,7 +63,7 @@ function App() {
       ]
     : [
         { label: 'Home', to: '/' },
-        { label: 'Login', to: '/login' },
+        { label: 'Signin', to: '/signin' },
         { label: 'Register', to: '/register' }
       ];
 
