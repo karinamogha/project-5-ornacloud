@@ -19,7 +19,10 @@ function CreateMemoPage() {
     email: '',
   });
 
-  // If not signed in, redirect to "/signin"
+  const [loading, setLoading] = useState(false);    // Loading state
+  const [error, setError] = useState('');           // Error message
+
+  // Redirect to SignIn if not signed in
   useEffect(() => {
     if (!signedIn) {
       navigate("/signin");
@@ -34,27 +37,33 @@ function CreateMemoPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);    // Start loading
+    setError('');        // Reset error message
 
-    fetch('http://localhost:5555/memos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formValues),
-    })
-      .then((response) => {
-        if (response.ok) {
-          alert('Memo created and email sent!');
-          navigate('/memos');
-        } else {
-          throw new Error('Error creating memo');
-        }
-      })
-      .catch((error) => {
-        alert(error.message);
+    try {
+      const response = await fetch('/memos', { // Ensure endpoint matches backend
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',  // Include credentials (cookies)
+        body: JSON.stringify(formValues),
       });
+
+      if (response.ok) {
+        alert('Memo created and email sent!');
+        navigate('/memos'); // Redirect to Memos Page
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error creating memo');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false); // End loading
+    }
   };
 
   return (
@@ -185,9 +194,13 @@ function CreateMemoPage() {
           />
         </div>
 
+        {/* Display Error Message */}
+        {error && <div className="form-error">{error}</div>}
+
+        {/* Form Buttons */}
         <div className="form-buttons">
-          <button type="submit" className="submit-button">
-            Create Memo
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? 'Creating...' : 'Create Memo'}
           </button>
           <Link to="/memos">
             <button type="button" className="submit-button">

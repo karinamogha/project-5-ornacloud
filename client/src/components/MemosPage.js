@@ -1,7 +1,8 @@
+// src/components/MemosPage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from "./UserContext";       // <-- Import your user context
-import { useNavigate } from "react-router-dom"; // <-- Import useNavigate
+import { useNavigate, Link } from "react-router-dom"; // <-- Import useNavigate and Link
 import '../index.css'; // Import global styles if needed
 
 function MemosPage() {
@@ -22,10 +23,18 @@ function MemosPage() {
 
   // Fetch memos from the backend
   const fetchMemos = async () => {
+    if (!company) {
+      setError('Please enter a company name to search.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:5555/api/memos/${company}`);
+      const response = await axios.get(`/memos`, {
+        params: { company },
+        withCredentials: true, // Include credentials (cookies)
+      });
       setMemos(response.data);
     } catch (err) {
       setError('Failed to fetch memos. Please try again.');
@@ -33,14 +42,39 @@ function MemosPage() {
       setLoading(false);
     }
   };
-
-  // Fetch whenever 'company' changes
+  
+  // Fetch whenever 'company' changes via manual search
+  // No need to auto-fetch on company change; user initiates search
+  // Remove the following useEffect if not needed
+  /*
   useEffect(() => {
     if (company) fetchMemos();
   }, [company]);
+  */
 
-  // If user is not signedIn, the `useEffect` above already redirects, 
-  // so the page won't render the below UI for unauthorized users.
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this memo?')) {
+      try {
+        const response = await axios.delete(`/api/memos/${id}`, {
+          withCredentials: true,
+        });
+
+        if (response.status === 200) {
+          alert('Memo deleted successfully!');
+          // Refresh the memos list
+          setMemos(memos.filter(memo => memo.id !== id));
+        } else {
+          throw new Error('Error deleting memo');
+        }
+      } catch (error) {
+        if (error.response && error.response.data && error.response.data.error) {
+          alert(error.response.data.error);
+        } else {
+          alert('Error deleting memo. Please try again.');
+        }
+      }
+    }
+  };
 
   return (
     <div className="page-container">
@@ -64,18 +98,35 @@ function MemosPage() {
 
       <ul className="list-container">
         {memos.map((memo) => (
-          <li key={memo.memo_number} className="list-item">
+          <li key={memo.id} className="list-item">
             <h3>{memo.title}</h3>
             <p>Memo Number: {memo.memo_number}</p>
             <p>Expiry Date: {memo.expiry_date}</p>
             <p>Company: {memo.company}</p>
+            <div className="action-buttons">
+              <Link to={`/memos/${memo.id}/edit`}>
+                <button className="edit-button">Edit</button>
+              </Link>
+              <button
+                onClick={() => handleDelete(memo.id)}
+                className="delete-button"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
+
+      {/* Optionally, add a button to create a new memo */}
+      <Link to="/create-memo">
+        <button className="create-button">Create New Memo</button>
+      </Link>
     </div>
   );
 }
 
 export default MemosPage;
+
 
 

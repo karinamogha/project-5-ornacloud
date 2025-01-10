@@ -17,6 +17,9 @@ function CreateInvoicePage() {
     email: '',
   });
 
+  const [loading, setLoading] = useState(false);    // Loading state
+  const [error, setError] = useState('');           // Error message
+
   // Redirect to SignIn if not signed in
   useEffect(() => {
     if (!signedIn) {
@@ -34,12 +37,16 @@ function CreateInvoicePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);    // Start loading
+    setError('');        // Reset error message
+
     try {
-      const response = await fetch('http://localhost:5555/invoices', { // Updated endpoint
+      const response = await fetch('http://localhost:5555/invoices', { // Ensure endpoint matches backend
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',  // Include credentials (cookies)
         body: JSON.stringify(formValues),
       });
 
@@ -51,7 +58,9 @@ function CreateInvoicePage() {
         throw new Error(errorData.error || 'Error creating invoice');
       }
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -160,9 +169,13 @@ function CreateInvoicePage() {
           />
         </div>
 
+        {/* Display Error Message */}
+        {error && <div className="form-error">{error}</div>}
+
+        {/* Form Buttons */}
         <div className="form-buttons">
-          <button type="submit" className="submit-button">
-            Create Invoice
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? 'Creating...' : 'Create Invoice'}
           </button>
           <Link to="/invoices">
             <button type="button" className="submit-button">

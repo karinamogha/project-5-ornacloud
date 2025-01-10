@@ -21,7 +21,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Application secret key for session management
 SECRET_KEY = os.environ.get('SECRET_KEY', b'y$2\xa7l\x89\xb0\t\x87\xb5\x1abf\xff\xeb\xd5')  # Use environment variable or fallback
-
+SECRET_KEY= b'y$2\xa7l\x89\xb0\t\x87\xb5\x1abf\xff\xeb\xd5'
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
 MAIL_USE_TLS = True
-MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'your_email@gmail.com')  # Replace with your email
-MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'your_password')  # Replace with your email password
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'karinamogha12@gmail.com')  # Replace with your email
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'wxrq wejl ayln mmdc')  # Replace with your email password
 
 # JSON configuration
 JSON_COMPACT = False

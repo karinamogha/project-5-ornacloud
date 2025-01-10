@@ -7,6 +7,8 @@ from models import User, Memo, Invoice, Category
 from config import app, api, logger, bcrypt, db, mail  # <-- Notice we also import 'mail'
 from flask_restful import Resource
 from flask_mail import Message  # <-- For sending emails
+from flask_cors import CORS
+
 
 # Routes and Views
 @app.route('/')
@@ -46,6 +48,7 @@ class Signup(Resource):
             db.session.add(user)
             db.session.commit()
             session['user_id'] = user.id
+            user_id=user.id
             logger.info(f"User '{username}' successfully signed up.")
             return make_response(user.to_dict(), 201)
 
@@ -62,6 +65,7 @@ class CheckSession(Resource):
             user_id = session.get('user_id')
             if user_id:
                 user = db.session.get(User, user_id)
+                user_id=user
                 if user:
                     logger.info(f"Session check successful for user ID: {user_id}")
                     return make_response(user.to_dict(), 200)
@@ -126,14 +130,35 @@ class Memos(Resource):
             company = request.args.get('company')
             if not company:
                 logger.error("Missing company parameter in memo retrieval request.")
-                return make_response({'error': 'Company parameter is required'}, 400)
-
+                return {'error': 'Company parameter is required'}, 400
+            user_id=session.get('user_id')
             memos = Memo.query.filter_by(company=company).all()
             logger.info(f"Memos retrieved for company: {company}")
-            return jsonify([memo.to_dict() for memo in memos])
+                       
+            # Explicitly serialize memos to avoid recursion issues
+            serialized_memos = [
+                {
+                    "id": memo.id,
+                    "title": memo.title,
+                    "memo_number": memo.memo_number,
+                    "expiry_date": memo.expiry_date,
+                    "wholesaler_details": memo.wholesaler_details,
+                    "buyer_details": memo.buyer_details,
+                    "items": memo.items,
+                    "total_value": memo.total_value,
+                    "remarks": memo.remarks,
+                    "company": memo.company,
+                    "user_id": memo.user_id,
+                }
+                for memo in memos
+            ]
+            
+            logger.info(f"Retrieved {len(serialized_memos)} memos for user_id: {user_id}")
+            return jsonify(serialized_memos)
+            
         except Exception as e:
             logger.error(f"Error retrieving memos: {e}")
-            return make_response({'error': 'Failed to retrieve memos'}, 500)
+            return {'error': 'Failed to retrieve memos'}, 500
 
     def post(self):
         if 'user_id' not in session:
@@ -177,10 +202,10 @@ class Memos(Resource):
                 mail.send(msg)
                 logger.info(f"Email sent to {client_email} for memo '{new_memo.title}'.")
 
-            return jsonify({"message": "Memo created successfully!"}), 201
+            return ({"message": "Memo created successfully!"}), 201
         except Exception as e:
             logger.error(f"Error during memo creation: {e}")
-            return make_response({'error': 'Failed to create memo'}, 400)
+            return ({'error': 'Failed to create memo'}, 400)
 
 # If your frontend calls "/memos", keep the next line as is:
 api.add_resource(Memos, '/memos')
@@ -244,7 +269,7 @@ class FutureMemos(Resource):
             return jsonify([m.to_dict() for m in memos])
         except Exception as e:
             logger.error(f"Error retrieving future memos for user {user_id}: {e}")
-            return make_response({'error': 'Failed to retrieve future memos'}, 500)
+            return {'error': 'Failed to retrieve future memos'}, 500
 
 api.add_resource(FutureMemos, '/api/memos/<int:user_id>/future')
 
