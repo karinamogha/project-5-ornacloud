@@ -5,8 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import '../index.css'; // Import global styles if needed
 
 function InvoicesPage() {
-  const { signedIn } = useUser();    // Check if user is signed in
-  const navigate = useNavigate();    // For navigation
+  const { signedIn } = useUser();
+  const navigate = useNavigate();
 
   const [invoices, setInvoices] = useState([]);
   const [company, setCompany] = useState('');
@@ -30,9 +30,8 @@ function InvoicesPage() {
     setLoading(true);
     setError('');
     try {
-      // Our Flask route is GET /invoices?company=...
       const res = await fetch(`/invoices?company=${encodeURIComponent(company)}`, {
-        credentials: 'include', // So the session cookie is sent
+        credentials: 'include', 
       });
       if (!res.ok) {
         throw new Error('Failed to fetch invoices');
@@ -46,10 +45,26 @@ function InvoicesPage() {
     }
   };
 
-  // If you wanted to auto-fetch whenever 'company' changes:
-  // useEffect(() => {
-  //   if (company) fetchInvoices();
-  // }, [company]);
+  // DELETE an invoice by ID
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this invoice?')) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        throw new Error('Failed to delete invoice');
+      }
+      // If successful, remove it from state
+      setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+      alert('Invoice deleted successfully!');
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="page-container">
@@ -79,24 +94,23 @@ function InvoicesPage() {
             <p>Total Value: {invoice.total_value}</p>
             <p>Company: {invoice.company}</p>
 
-            {/* 
-              If you ever add "Edit Invoice" or "Delete Invoice" 
-              endpoints, you can replicate Memos' action buttons:
-              
-              <div className="action-buttons">
-                <Link to={`/invoices/${invoice.id}/edit`}>
-                  <button className="edit-button">Edit</button>
-                </Link>
-                <button onClick={() => handleDelete(invoice.id)}>
-                  Delete
-                </button>
-              </div>
-            */}
+            {/* Action buttons for Edit & Delete */}
+            <div className="action-buttons">
+              <Link to={`/invoices/${invoice.id}/edit`}>
+                <button className="edit-button">Edit</button>
+              </Link>
+              <button
+                onClick={() => handleDelete(invoice.id)}
+                className="delete-button"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
 
-      {/* Optionally, add a button to create a new invoice */}
+      {/* Create New Invoice Button */}
       <Link to="/create-invoice">
         <button className="create-button">Create New Invoice</button>
       </Link>
@@ -105,6 +119,7 @@ function InvoicesPage() {
 }
 
 export default InvoicesPage;
+
 
 
 

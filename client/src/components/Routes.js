@@ -9,8 +9,9 @@ import InvoicesPage from "./InvoicesPage";
 import CreateMemoPage from "./CreateMemoPage";
 import CreateInvoicePage from "./CreateInvoicePage";
 
-// 1) IMPORT YOUR NEW EDIT PAGE
-import EditMemoPage from "./EditMemoPage"; // <--- Add this
+// Import your new EditInvoicePage
+import EditMemoPage from "./EditMemoPage";
+import EditInvoicePage from "./EditInvoicePage"; // <--- NEW
 
 const routes = createBrowserRouter([
   {
@@ -25,12 +26,16 @@ const routes = createBrowserRouter([
       { path: "/create-memo", element: <CreateMemoPage /> },
       { path: "/create-invoice", element: <CreateInvoicePage /> },
 
-      // 2) ADD A ROUTE FOR EDIT
+      // Already have memos edit
       { path: "/memos/:memoId/edit", element: <EditMemoPage /> },
+
+      // NEW: Invoices edit route
+      { path: "/invoices/:invoiceId/edit", element: <EditInvoicePage /> },
     ],
   },
 ]);
 
 export default routes;
+
 
 

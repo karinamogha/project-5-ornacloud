@@ -1,70 +1,179 @@
-# Getting Started with Create React App
+# Welcome to OrnaCloud
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Efficiently Manage Your Memos and Invoices
+
+OrnaCloud provides a seamless platform to help businesses of all types manage memos and invoices efficiently. Whether you're a wholesaler, designer, or individual, OrnaCloud is tailored to suit your organizational needs. This README provides detailed instructions on how to get started with OrnaCloud, its features, and how to deploy it.
+
+---
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Technology Stack](#technology-stack)
+3. [Installation](#installation)
+4. [Available Scripts](#available-scripts)
+5. [Usage](#usage)
+6. [Deployment](#deployment)
+7. [Contributing](#contributing)
+8. [Support](#support)
+
+---
+
+## Features
+
+- **Efficient Document Management:**
+  - View, create, and manage memos and invoices from a single platform.
+  - Organize documents in personal folders for easy access.
+
+- **User-Friendly Interface:**
+  - Simplified forms for creating memos and invoices.
+  - Visual dashboard to navigate between functionalities.
+
+- **Secure Access:**
+  - Register and manage your account with secure authentication.
+  - Personal dashboards for users to monitor their activities.
+
+- **Quick Communication:**
+  - Send memos and invoices directly to clients from the platform.
+
+---
+
+## Technology Stack
+
+OrnaCloud is built using the following technologies:
+
+- **Frontend:** React.js
+- **Backend:** Flask (Python)
+- **Database:** SQLite (Development) / PostgreSQL (Production)
+- **Styling:** TailwindCSS
+- **API Communication:** RESTful API
+
+---
+
+## Installation
+
+To set up OrnaCloud locally, follow these steps:
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- Node.js (https://nodejs.org)
+- Python 3.x (https://python.org)
+- pip (Python package manager)
+- npm or yarn
+
+### Steps
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/ornacloud.git
+   cd ornacloud
+   ```
+
+2. Install backend dependencies:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+3. Install frontend dependencies:
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+4. Set up environment variables:
+   - Create a `.env` file in the `backend` directory.
+   - Define variables like `SECRET_KEY`, `DATABASE_URL`, etc.
+
+5. Run database migrations:
+   ```bash
+   cd backend
+   flask db upgrade
+   ```
+
+---
 
 ## Available Scripts
 
-In the project directory, you can run:
+### Backend
 
-### `npm start`
+In the `backend` directory, you can run:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- `flask run`: Start the Flask development server.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Frontend
 
-### `npm test`
+In the `frontend` directory, you can run:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- `npm start`: Start the React development server.
+- `npm test`: Launch the test runner in interactive mode.
+- `npm run build`: Build the app for production to the `build` folder.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Usage
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Creating a Memo or Invoice
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Navigate to the dashboard after logging in.
+2. Click on "Create Memo" or "Create Invoice."
+3. Fill out the required fields and submit the form.
+4. Send the memo or invoice to clients or save it in your personal folder.
 
-### `npm run eject`
+### Viewing Documents
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Go to the "Memos" or "Invoices" section from the navigation menu.
+2. Select a document to view its details.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Managing Your Account
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+1. Access your account settings from the dashboard.
+2. Update your profile or change your password as needed.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+---
 
-## Learn More
+## Deployment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To deploy OrnaCloud for production:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. **Build the frontend:**
+   ```bash
+   cd frontend
+   npm run build
+   ```
 
-### Code Splitting
+2. **Configure the backend:**
+   - Set the `FLASK_ENV` to `production`.
+   - Use a production-ready database like PostgreSQL.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+3. **Serve the application:**
+   - Use a production server like Gunicorn for the backend.
+   - Use Nginx or Apache to serve the built frontend.
 
-### Analyzing the Bundle Size
+4. **Environment Variables:**
+   - Ensure all required variables are properly set in a secure `.env` file.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Contributions are welcome! To contribute:
 
-### Advanced Configuration
+1. Fork the repository.
+2. Create a new branch (`feature/new-feature`).
+3. Commit your changes and push the branch.
+4. Open a Pull Request describing your changes.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## Support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+For support or questions, please open an issue in the repository or contact support at `support@ornacloud.com`.
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Start managing your memos and invoices efficiently with OrnaCloud today!
+
+
