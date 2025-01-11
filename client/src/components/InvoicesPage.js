@@ -1,7 +1,7 @@
+// src/components/InvoicesPage.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useUser } from "./UserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import '../index.css'; // Import global styles if needed
 
 function InvoicesPage() {
@@ -22,11 +22,23 @@ function InvoicesPage() {
 
   // Fetch invoices from the backend
   const fetchInvoices = async () => {
+    if (!company) {
+      setError('Please enter a company name to search.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:5555/api/invoices/${company}`);
-      setInvoices(response.data);
+      // Our Flask route is GET /invoices?company=...
+      const res = await fetch(`/invoices?company=${encodeURIComponent(company)}`, {
+        credentials: 'include', // So the session cookie is sent
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch invoices');
+      }
+      const data = await res.json();
+      setInvoices(data);
     } catch (err) {
       setError('Failed to fetch invoices. Please try again.');
     } finally {
@@ -34,10 +46,10 @@ function InvoicesPage() {
     }
   };
 
-  // Fetch whenever 'company' changes
-  useEffect(() => {
-    if (company) fetchInvoices();
-  }, [company]);
+  // If you wanted to auto-fetch whenever 'company' changes:
+  // useEffect(() => {
+  //   if (company) fetchInvoices();
+  // }, [company]);
 
   return (
     <div className="page-container">
@@ -61,19 +73,40 @@ function InvoicesPage() {
 
       <ul className="list-container">
         {invoices.map((invoice) => (
-          <li key={invoice.invoice_number} className="list-item">
+          <li key={invoice.id} className="list-item">
             <h3>{invoice.title}</h3>
             <p>Invoice Number: {invoice.invoice_number}</p>
             <p>Total Value: {invoice.total_value}</p>
             <p>Company: {invoice.company}</p>
+
+            {/* 
+              If you ever add "Edit Invoice" or "Delete Invoice" 
+              endpoints, you can replicate Memos' action buttons:
+              
+              <div className="action-buttons">
+                <Link to={`/invoices/${invoice.id}/edit`}>
+                  <button className="edit-button">Edit</button>
+                </Link>
+                <button onClick={() => handleDelete(invoice.id)}>
+                  Delete
+                </button>
+              </div>
+            */}
           </li>
         ))}
       </ul>
+
+      {/* Optionally, add a button to create a new invoice */}
+      <Link to="/create-invoice">
+        <button className="create-button">Create New Invoice</button>
+      </Link>
     </div>
   );
 }
 
 export default InvoicesPage;
+
+
 
 
 

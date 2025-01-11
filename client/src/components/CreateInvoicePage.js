@@ -1,9 +1,10 @@
+// src/components/CreateInvoicePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from "./UserContext"; // Ensure this context provides `signedIn`
 
 function CreateInvoicePage() {
-  const { signedIn } = useUser();    // Check if the user is signed in
+  const { signedIn } = useUser();  // Check if user is signed in
   const navigate = useNavigate();
 
   const [formValues, setFormValues] = useState({
@@ -17,8 +18,8 @@ function CreateInvoicePage() {
     email: '',
   });
 
-  const [loading, setLoading] = useState(false);    // Loading state
-  const [error, setError] = useState('');           // Error message
+  const [loading, setLoading] = useState(false);  // Loading state
+  const [error, setError] = useState('');         // Error message
 
   // Redirect to SignIn if not signed in
   useEffect(() => {
@@ -27,26 +28,26 @@ function CreateInvoicePage() {
     }
   }, [signedIn, navigate]);
 
+  // Handle form changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues(prevValues => ({
+    setFormValues((prevValues) => ({
       ...prevValues,
-      [name]: value
+      [name]: value,
     }));
   };
 
+  // Submit form (POST to /invoices)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);    // Start loading
-    setError('');        // Reset error message
+    setLoading(true);
+    setError('');
 
     try {
-      const response = await fetch('http://localhost:5555/invoices', { // Ensure endpoint matches backend
+      const response = await fetch('/invoices', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',  // Include credentials (cookies)
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include credentials (cookies)
         body: JSON.stringify(formValues),
       });
 
@@ -60,7 +61,7 @@ function CreateInvoicePage() {
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
 
@@ -68,6 +69,7 @@ function CreateInvoicePage() {
     <div className="create-page">
       <h2>Create a New Invoice</h2>
       <form onSubmit={handleSubmit}>
+
         {/* Title */}
         <div className="row">
           <label htmlFor="title">Title</label>
@@ -189,6 +191,7 @@ function CreateInvoicePage() {
 }
 
 export default CreateInvoicePage;
+
 
 
 
