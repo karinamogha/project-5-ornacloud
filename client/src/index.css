@@ -594,6 +594,66 @@ h1, h2, h3, h4, h5, h6 {
     padding: var(--spacing-sm);
   }
 }
+/*  (near the bottom of your CSS, for clarity) */
+.item-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-right: 0.25rem; /* small spacing after label */
+}
+
+/* Optional: you can style a separate .invoice-card or .memo-card 
+   if you want different background colors, etc. */
+
+/* Example custom classes for invoice/memo lists */
+.invoice-list,
+.memo-list {
+  list-style: none;   /* remove bullet points */
+  padding: 0;
+  margin: 0;
+}
+/* Card hover (blue) */
+.card:hover {
+  background-color: #eef6ff;
+  box-shadow: 0 6px 10px var(--shadow-hover);
+  transform: translateY(-3px);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Buttons row */
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: 1rem;
+}
+
+/* Edit button */
+.edit-button {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.edit-button:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Delete button */
+.delete-button {
+  background-color: var(--color-error);
+  color: #ffffff;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.delete-button:hover {
+  background-color: #c0392b;
+}
+
 
 
 

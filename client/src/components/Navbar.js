@@ -47,8 +47,6 @@ function Navbar() {
           (<NavLink className='headerlink' onClick={logout}>Logout</NavLink>)
         }
 
-        {/* Conditional rendering for "My Listings" when signed in */}
-        {signedIn && <NavLink className="headerlink" to='/my-listings'>My Listings</NavLink>}
 
         {/* Always show "Create Memo" and "Create Invoice" */}
         <NavLink className="headerlink" to='/create-memo'>Create Memo</NavLink>
