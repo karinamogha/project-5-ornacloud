@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from "./UserContext";
 import { useNavigate, Link } from "react-router-dom";
-import '../index.css';
+import '../index.css'; // Import global styles if needed
 
 function InvoicesPage() {
   const { signedIn } = useUser();
@@ -13,44 +13,39 @@ function InvoicesPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect to SignIn if not signed in
   useEffect(() => {
     if (!signedIn) {
       navigate("/signin");
-    } else {
-      fetchInvoices(); // load all invoices on mount
     }
   }, [signedIn, navigate]);
 
-  const fetchInvoices = async (searchCompany) => {
+  // Fetch invoices from the backend
+  const fetchInvoices = async () => {
+    if (!company) {
+      setError('Please enter a company name to search.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      let url = '/invoices';
-      if (searchCompany) {
-        url += `?company=${encodeURIComponent(searchCompany)}`;
-      }
-
-      const res = await fetch(url, { credentials: 'include' });
+      const res = await fetch(`/invoices?company=${encodeURIComponent(company)}`, {
+        credentials: 'include', 
+      });
       if (!res.ok) {
         throw new Error('Failed to fetch invoices');
       }
       const data = await res.json();
       setInvoices(data);
     } catch (err) {
-      setError(err.message || 'Failed to fetch invoices. Please try again.');
+      setError('Failed to fetch invoices. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    if (!company) {
-      fetchInvoices();      // if no company, fetch all
-    } else {
-      fetchInvoices(company);
-    }
-  };
-
+  // DELETE an invoice by ID
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this invoice?')) {
       return;
@@ -63,6 +58,7 @@ function InvoicesPage() {
       if (!res.ok) {
         throw new Error('Failed to delete invoice');
       }
+      // If successful, remove it from state
       setInvoices((prev) => prev.filter((inv) => inv.id !== id));
       alert('Invoice deleted successfully!');
     } catch (err) {
@@ -74,7 +70,6 @@ function InvoicesPage() {
     <div className="page-container">
       <h1>Existing Invoices</h1>
 
-      {/* Search Bar */}
       <div className="existing-search-form">
         <input
           type="text"
@@ -83,7 +78,7 @@ function InvoicesPage() {
           onChange={(e) => setCompany(e.target.value)}
           className="existing-search-input"
         />
-        <button onClick={handleSearch} className="existing-search-button">
+        <button onClick={fetchInvoices} className="existing-search-button">
           Search
         </button>
       </div>
@@ -91,26 +86,16 @@ function InvoicesPage() {
       {loading && <p>Loading...</p>}
       {error && <p className="form-error">{error}</p>}
 
-      {/* 
-         Instead of .list-container / .list-item,
-         use .cards (a grid) & .card (a box), 
-         which are defined in your CSS.
-      */}
-      <ul className="cards invoice-list">
+      <ul className="list-container">
         {invoices.map((invoice) => (
-          <li key={invoice.id} className="card invoice-card">
-            <h3 className="card-title">{invoice.title}</h3>
-            <p className="card-content">
-              <span className="item-label">Invoice Number:</span> {invoice.invoice_number}
-            </p>
-            <p className="card-content">
-              <span className="item-label">Total Value:</span> {invoice.total_value}
-            </p>
-            <p className="card-content">
-              <span className="item-label">Company:</span> {invoice.company}
-            </p>
+          <li key={invoice.id} className="list-item">
+            <h3>{invoice.title}</h3>
+            <p>Invoice Number: {invoice.invoice_number}</p>
+            <p>Total Value: {invoice.total_value}</p>
+            <p>Company: {invoice.company}</p>
 
-            <div className="action-buttons" style={{ marginTop: '1rem' }}>
+            {/* Action buttons for Edit & Delete */}
+            <div className="action-buttons">
               <Link to={`/invoices/${invoice.id}/edit`}>
                 <button className="edit-button">Edit</button>
               </Link>
@@ -125,6 +110,7 @@ function InvoicesPage() {
         ))}
       </ul>
 
+      {/* Create New Invoice Button */}
       <Link to="/create-invoice">
         <button className="create-button">Create New Invoice</button>
       </Link>
@@ -133,11 +119,3 @@ function InvoicesPage() {
 }
 
 export default InvoicesPage;
-
-
-
-
-
-
-
-

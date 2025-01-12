@@ -1,72 +1,77 @@
 // src/components/MemosPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useUser } from "./UserContext";
-import { useNavigate, Link } from "react-router-dom";
-import '../index.css'; 
+import axios from 'axios';
+import { useUser } from "./UserContext";       // <-- Import your user context
+import { useNavigate, Link } from "react-router-dom"; // <-- Import useNavigate and Link
+import '../index.css'; // Import global styles if needed
 
 function MemosPage() {
-  const { signedIn } = useUser();
-  const navigate = useNavigate();
+  const { signedIn } = useUser();          // <-- Grab signedIn from context
+  const navigate = useNavigate();          // <-- For navigation
 
   const [memos, setMemos] = useState([]);
   const [company, setCompany] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect to SignIn if not signed in
   useEffect(() => {
     if (!signedIn) {
       navigate("/signin");
-    } else {
-      fetchMemos(); // load all memos
     }
   }, [signedIn, navigate]);
 
-  const fetchMemos = async (searchCompany) => {
+  // Fetch memos from the backend
+  const fetchMemos = async () => {
+    if (!company) {
+      setError('Please enter a company name to search.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      let url = '/memos';
-      if (searchCompany) {
-        url += `?company=${encodeURIComponent(searchCompany)}`;
-      }
-
-      const response = await fetch(url, {
-        credentials: 'include',
+      const response = await axios.get(`/memos`, {
+        params: { company },
+        withCredentials: true, // Include credentials (cookies)
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch memos');
-      }
-      const data = await response.json();
-      setMemos(data);
+      setMemos(response.data);
     } catch (err) {
-      setError(err.message || 'Failed to fetch memos. Please try again.');
+      setError('Failed to fetch memos. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
-  const handleSearch = () => {
-    if (!company) {
-      fetchMemos(); // all memos
-    } else {
-      fetchMemos(company);
-    }
-  };
+  
+  // Fetch whenever 'company' changes via manual search
+  // No need to auto-fetch on company change; user initiates search
+  // Remove the following useEffect if not needed
+  /*
+  useEffect(() => {
+    if (company) fetchMemos();
+  }, [company]);
+  */
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this memo?')) {
       try {
-        const response = await fetch(`/api/memos/${id}`, {
-          method: 'DELETE',
-          credentials: 'include',
+        const response = await axios.delete(`/api/memos/${id}`, {
+          withCredentials: true,
         });
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          alert('Memo deleted successfully!');
+          // Refresh the memos list
+          setMemos(memos.filter(memo => memo.id !== id));
+        } else {
           throw new Error('Error deleting memo');
         }
-        setMemos((prev) => prev.filter((memo) => memo.id !== id));
-        alert('Memo deleted successfully!');
       } catch (error) {
-        alert(error.message);
+        if (error.response && error.response.data && error.response.data.error) {
+          alert(error.response.data.error);
+        } else {
+          alert('Error deleting memo. Please try again.');
+        }
       }
     }
   };
@@ -83,7 +88,7 @@ function MemosPage() {
           onChange={(e) => setCompany(e.target.value)}
           className="existing-search-input"
         />
-        <button onClick={handleSearch} className="existing-search-button">
+        <button onClick={fetchMemos} className="existing-search-button">
           Search
         </button>
       </div>
@@ -91,22 +96,14 @@ function MemosPage() {
       {loading && <p>Loading...</p>}
       {error && <p className="form-error">{error}</p>}
 
-      {/* Turn each memo into a "card" */}
-      <ul className="cards memo-list">
+      <ul className="list-container">
         {memos.map((memo) => (
-          <li key={memo.id} className="card memo-card">
-            <h3 className="card-title">{memo.title}</h3>
-            <p className="card-content">
-              <span className="item-label">Memo Number:</span> {memo.memo_number}
-            </p>
-            <p className="card-content">
-              <span className="item-label">Expiry Date:</span> {memo.expiry_date}
-            </p>
-            <p className="card-content">
-              <span className="item-label">Company:</span> {memo.company}
-            </p>
-            
-            <div className="action-buttons" style={{ marginTop: '1rem' }}>
+          <li key={memo.id} className="list-item">
+            <h3>{memo.title}</h3>
+            <p>Memo Number: {memo.memo_number}</p>
+            <p>Expiry Date: {memo.expiry_date}</p>
+            <p>Company: {memo.company}</p>
+            <div className="action-buttons">
               <Link to={`/memos/${memo.id}/edit`}>
                 <button className="edit-button">Edit</button>
               </Link>
@@ -121,6 +118,7 @@ function MemosPage() {
         ))}
       </ul>
 
+      {/* Optionally, add a button to create a new memo */}
       <Link to="/create-memo">
         <button className="create-button">Create New Memo</button>
       </Link>

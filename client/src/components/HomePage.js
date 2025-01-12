@@ -50,11 +50,7 @@ function HomePage() {
           <Link to='/signin'>
             <button className="submit-button">Sign In</button>
           </Link>
-        ) : (
-          <Link to='/dashboard'>
-            <button className="submit-button">Go to Dashboard</button>
-          </Link>
-        )}
+        ) : null}
       </section>
 
       <section>
@@ -74,4 +70,5 @@ function HomePage() {
 }
 
 export default HomePage;
+
 
