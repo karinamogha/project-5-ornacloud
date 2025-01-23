@@ -7,7 +7,7 @@ import { useFormik } from "formik";
 function RegisterPage() {
   const navigate = useNavigate();
 
-  // 2) Initialize a simple Formik instance (dummy usage so we don't break existing code)
+  // 2) Initialize a simple Formik instance 
   const formik = useFormik({
     initialValues: { placeholder: "" },
     onSubmit: values => {
